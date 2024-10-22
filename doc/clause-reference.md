@@ -486,7 +486,7 @@ user=> (sql/format {:with [[:stuff {:select :*
 ["WITH stuff AS NOT MATERIALIZED (SELECT * FROM table) SELECT * FROM stuff"]
 ```
 
-As of 2.6.next, you can specify `SEARCH` and/or `CYCLE` clauses, in place of
+As of 2.6.1203, you can specify `SEARCH` and/or `CYCLE` clauses, in place of
 or following the `MATERIALIZED` marker:
 
 ```clojure
