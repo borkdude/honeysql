@@ -1,4 +1,4 @@
-name: Pull Request
+name: Babashka tests
 
 on: [pull_request]
 
