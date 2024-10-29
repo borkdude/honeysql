@@ -419,7 +419,8 @@
 (defn- format-simple-var
   ([x]
    (let [c (if (keyword? x)
-             #?(:clj (str (.sym ^clojure.lang.Keyword x)) ;; Omits leading colon
+             #?(:bb (str (symbol x))
+                :clj (str (.sym ^clojure.lang.Keyword x)) ;; Omits leading colon
                 :default (subs (str x) 1))
              (str x))]
      (format-simple-var x c {})))
@@ -437,7 +438,8 @@
    ;; for multiple / in the %fun.call case so that
    ;; qualified column names can be used:
    (let [c (if (keyword? x)
-             #?(:clj (str (.sym ^clojure.lang.Keyword x)) ;; Omits leading colon
+             #?(:bb (str (symbol x))
+                :clj (str (.sym ^clojure.lang.Keyword x)) ;; Omits leading colon
                 :default (subs (str x) 1))
              (str x))]
      (cond (str/starts-with? c "%")
