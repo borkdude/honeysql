@@ -540,8 +540,8 @@
                                 [(str (sql-kw k) " (" sql ")")
                                  params])
                               :else
-                              (throw (ex-info "bigquery * only supports except and replace"
-                                              {:clause k :arg arg})))]
+                              ((fn [] (throw (ex-info "bigquery * only supports except and replace"
+                                                      {:clause k :arg arg})))))]
                     (into* [(cond->> sql' sql (str sql " "))] params params')))
                 []
                 (partition-all 2 x))]
@@ -655,8 +655,8 @@
     (let [hints (format-meta x ",")
           [selectable alias temporal] (split-alias-temporal x)
           _ (when (= ::too-many! temporal)
-              (throw (ex-info "illegal syntax in select expression"
-                              {:symbol selectable :alias alias :unexpected (nnext x)})))
+              ((fn [] (throw (ex-info "illegal syntax in select expression"
+                                      {:symbol selectable :alias alias :unexpected (nnext x)})))))
           [sql & params] (if (map? selectable)
                            (format-dsl selectable {:nested true})
                            (format-expr selectable))
@@ -1268,8 +1268,8 @@
           n (count exprs)
           [clause & more] (drop n x)
           _ (when (seq more)
-              (throw (ex-info "unsupported :on-conflict format"
-                              {:clause x})))
+              ((fn [] (throw (ex-info "unsupported :on-conflict format"
+                                      {:clause x})))))
           [sqls expr-params]
           (when (seq exprs)
             (format-expr-list (map (fn [e] (if (sequential? e) [:nest e] e)) exprs)))
@@ -1366,8 +1366,8 @@
           (ident? opt)
           (sql-kw-ddl opt)
           :else
-          (throw (ex-info "expected symbol or keyword"
-                          {:unexpected opt})))))
+          ((fn [] (throw (ex-info "expected symbol or keyword"
+                                  {:unexpected opt})))))))
 
 (defn- destructure-ddl-item [table context]
   (let [params
@@ -1541,8 +1541,8 @@
           tables
           [tables])
         _    (when-not (every? ident? params)
-               (throw (ex-info "DROP COLUMNS expects just column names"
-                               {:tables tables})))]
+               ((fn [] (throw (ex-info "DROP COLUMNS expects just column names"
+                                       {:tables tables})))))]
     (loop [if-exists false coll params sqls []]
       (if (seq coll)
         (if (#{:if-exists 'if-exists} (first coll))
@@ -2135,10 +2135,10 @@
 (defn- format-equality-expr [op' op expr nested]
   (let [[_ a b & y] expr
         _           (when (seq y)
-                      (throw (ex-info (str "only binary "
-                                           op'
-                                           " is supported")
-                                      {:expr expr})))
+                      ((fn [] (throw (ex-info (str "only binary "
+                                                   op'
+                                                   " is supported")
+                                              {:expr expr})))))
         [s1 & p1]   (format-expr a {:nested true})
         [s2 & p2]   (format-expr b {:nested true})]
     (-> (if (or (nil? a) (nil? b))
