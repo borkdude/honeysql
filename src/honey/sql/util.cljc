@@ -1,7 +1,7 @@
 (ns honey.sql.util
   "Utility functions for the main honey.sql namespace."
   (:refer-clojure :exclude [str])
-  (:require [clojure.string]))
+  (:require [clojure.string :as string]))
 
 #?(:clj (set! *warn-on-reflection* true))
 
@@ -76,7 +76,7 @@
                    false coll))
 
       :default
-      (clojure.string/join separator (transduce xform conj [] coll)))))
+      (string/join separator (transduce xform conj [] coll)))))
 
 (defn split-by-separator
   "More efficient implementation of `clojure.string/split` for cases when a
@@ -84,7 +84,7 @@
   separator is not present in the haystack at all."
   [s sep]
   (loop [start 0, res []]
-    (if-some [sep-idx (clojure.string/index-of s sep start)]
+    (if-some [sep-idx (string/index-of s sep start)]
       (let [sep-idx (long sep-idx)]
         (recur (inc sep-idx) (conj res (subs s start sep-idx))))
       (if (= start 0)

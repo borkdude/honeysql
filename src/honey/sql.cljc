@@ -27,7 +27,7 @@
         and optionally set a global `:quoted` option.
   * `sql-kw` -- turns a Clojure keyword (or symbol) into SQL code (makes
         it uppercase and replaces - with space). "
-  (:refer-clojure :exclude [format str])
+  (:refer-clojure :exclude [format #_str])
   (:require [clojure.string :as str]
             #?(:clj [clojure.template])
             [honey.sql.protocols :as p]
@@ -40,6 +40,9 @@
 (declare format-dsl)
 (declare format-expr)
 (declare format-expr-list)
+
+(defn binding [_ & xs] (last xs))
+(def name str)
 
 ;; dynamic dialect handling for formatting
 
@@ -108,6 +111,8 @@
 
 (declare register-clause!)
 
+(defn keyword? [x] (string? x))
+
 (def ^:private dialects
   (atom
    (reduce-kv (fn [m k v]
@@ -161,9 +166,11 @@
 ;; #533 mostly undocumented dynvar to prevent ? -> ?? escaping:
 (def ^:no-doc ^:dynamic *escape-?* true)
 
+(defn str-includes? [s p] (pos? (.indexOf s p)))
+
 ;; suspicious entity names:
 (def ^:private suspicious ";")
-(defn- suspicious? [s] (str/includes? s suspicious))
+(defn- suspicious? [s] (pos? (.indexOf s suspicious)) #_(str/includes? s suspicious))
 (defn- suspicious-entity-check [entity]
     (when-not *allow-suspicious-entities*
       (when (suspicious? entity)
@@ -230,7 +237,7 @@
   Hyphens at the start or end of a string should not be touched."
   [s]
   (cond-> s
-    (str/includes? s "-") (str/replace #"(\w)-(?=\w)" "$1 ")))
+    (str-includes? s "-") (str/replace #"(\w)-(?=\w)" "$1 ")))
 
 (defn- namespace-_
   "Return the namespace portion of a symbol, with dashes converted."
@@ -374,7 +381,8 @@
   "Given a keyword, produce a symbol, retaining the namespace
   qualifier, if any."
   [k]
-  (if (keyword? k)
+  k
+  #_(if (keyword? k)
     #?(:bb (if-let [n (namespace k)]
              (symbol n (name k))
              (symbol (name k)))
@@ -558,7 +566,7 @@
   "Given a general selectable item, split it into the subject selectable,
    an optional alias, and any temporal clauses present."
   [[selectable alias-for for-part & more]]
-  (let [no-alias? (and (contains? #{:for 'for} alias-for)
+  (let [no-alias? (and (contains? #{:for #_'for} alias-for)
                        for-part)]
     [selectable
      (if no-alias?
@@ -566,7 +574,7 @@
        alias-for)
      (cond no-alias?
            (into [alias-for for-part] more)
-           (contains? #{:for 'for} for-part)
+           (contains? #{:for #_'for} for-part)
            (cons for-part more)
            (or for-part (seq more))
            ::too-many!)]))
@@ -831,11 +839,11 @@
   (format-selects-common
    (sql-kw k)
    (#{:select :select-distinct :rename :from :window :delete-from :facet
-      'select 'select-distinct 'rename 'from 'window 'delete-from 'facet
+      #_#_#_#_#_#_#_'select 'select-distinct 'rename 'from 'window 'delete-from 'facet
       }
     k)
    xs
-   (#{:exclude :rename 'exclude 'rename} k)))
+   (#{:exclude :rename #_#_'exclude 'rename} k)))
 
 (defn- format-selects-on [_ xs]
   (let [[on & cols] xs
@@ -847,6 +855,8 @@
          true
          cols)]
     (into* [sql'] params params')))
+
+(defn ident? [x] (string? x))
 
 (defn- format-select-top [k xs]
   (let [[top & cols] xs
@@ -1762,11 +1772,11 @@
    (binding [*dsl* statement-map]
      (let [[sqls params leftover]
            (reduce (fn [[sql params leftover] k]
-                     (if-some [xs (if-some [xs (k leftover)]
+                     (if-some [xs (if-some [xs (get leftover k)]
                                     xs
                                     (let [s (kw->sym k)]
                                       (get leftover s)))]
-                       (let [formatter (k @clause-format)
+                       (let [formatter (get @clause-format k)
                              [sql' & params'] (formatter k xs)]
                          [(conj sql sql')
                           (if params' (into params params') params)
