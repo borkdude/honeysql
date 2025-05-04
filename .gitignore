@@ -27,3 +27,5 @@
 /classes
 /cljs-test-runner-out
 /target
+js
+node_modules

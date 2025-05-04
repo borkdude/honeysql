@@ -1,7 +1,7 @@
 (ns honey.sql.util
   "Utility functions for the main honey.sql namespace."
   (:refer-clojure :exclude [str])
-  (:require clojure.string))
+  (:require [clojure.string]))
 
 #?(:clj (set! *warn-on-reflection* true))
 
@@ -107,3 +107,5 @@
        (reduce conj! to' from4)
        (persistent! to'))
      to)))
+
+

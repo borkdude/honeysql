@@ -6,5 +6,5 @@
 
 #?(:clj (set! *warn-on-reflection* true))
 
-(defprotocol InlineValue :extend-via-metadata true
+(defprotocol InlineValue ;; :extend-via-metadata true
   (sqlize [this] "Render value inline in a SQL string."))
