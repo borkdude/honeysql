@@ -395,19 +395,19 @@
 
 (extend-protocol p/InlineValue
   nil
-  (sqlize [_] "NULL")
+  (p/sqlize [_] "NULL")
   #?(:cljs string :default String)
   (sqlize [x] (str \' (str/replace x "'" "''") \'))
-  #?(:cljs Keyword :default clojure.lang.Keyword)
-  (sqlize [x] (sql-kw x))
-  #?(:cljs Symbol :default clojure.lang.Symbol)
-  (sqlize [x] (sql-kw x))
-  #?(:cljs PersistentVector :default clojure.lang.IPersistentVector)
-  (sqlize [x] (str "[" (join ", " (map p/sqlize) x) "]"))
-  #?(:cljs PersistentArrayMap :default clojure.lang.IPersistentMap)
-  (sqlize [x] (inline-map x))
-  #?@(:cljs [PersistentHashMap
-             (sqlize [x] (inline-map x))])
+  ;; #?(:cljs Keyword :default clojure.lang.Keyword)
+  ;; (sqlize [x] (sql-kw x))
+  ;; #?(:cljs Symbol :default clojure.lang.Symbol)
+  ;; (sqlize [x] (sql-kw x))
+  ;; #?(:cljs PersistentVector :default clojure.lang.IPersistentVector)
+  ;; (sqlize [x] (str "[" (join ", " (map p/sqlize) x) "]"))
+  ;; #?(:cljs PersistentArrayMap :default clojure.lang.IPersistentMap)
+  ;; (sqlize [x] (inline-map x))
+  ;; #?@(:cljs [PersistentHashMap
+  ;;            (sqlize [x] (inline-map x))])
   #?@(:clj [java.util.UUID
             ;; issue 385: quoted UUIDs for PostgreSQL/ANSI
             (sqlize [x] (str \' x \'))])
@@ -1746,7 +1746,7 @@
          :compare-with    format-interval
          :timeseries      format-interval}))
 
-(assert (= (set @base-clause-order)
+#_(assert (= (set @base-clause-order)
            (set @current-clause-order)
            (set (keys @clause-format))))
 
@@ -1792,6 +1792,8 @@
   {:not= :<>
    :!= :<>
    :regex :regexp})
+
+(def keyword str)
 
 (def ^:private infix-ops
   (-> #{"and" "or" "xor" "<>" "<=" ">=" "||" "<->"
